@@ -1,19 +1,19 @@
 // Import the Web3 library
 const { Web3 } = require('web3');
 
-const { contract_abi } = require('./src/abi.js');
+const { contractAbi } = require('../abi/iron-usdc.js');
 
 // RPC url for your network
-const rpcUrl = 'https://arb1.arbitrum.io/rpc';
+const rpcUrl = 'https://mainnet.mode.network/';
 
 // Create a Web3 instance to connect to the blockchain
 const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
 // Contract address and ABI
-const contract_address = "0xb05Ea3cD21ec0cC3BEf7BDD83FfAc60a552B9272";
+const contractAddress = "0xe7334Ad0e325139329E747cF2Fc24538dD564987";
 
 // Get the contract instance
-const contract = new web3.eth.Contract(contract_abi, contract_address);
+const contract = new web3.eth.Contract(contractAbi, contractAddress);
 
 // Function to get contract events
 async function getContractEvents(blockRange: number): Promise<Object[]> {
@@ -82,9 +82,8 @@ async function readContractReadFunctionData() {
 
 // Main function to execute the above functions
 async function main() {
-    //console.log("ABI: ", contract_abi);
     try {
-        const blockRange = 20000;
+        const blockRange = 500;
         const events = await getContractEvents(blockRange);
         console.log("There are: ", events.length, " events found in the past ", blockRange, " blocks");
         console.log("All events:", events);
@@ -100,4 +99,4 @@ async function main() {
 // Run the main function
 main();
 
-export{};
+export {};
