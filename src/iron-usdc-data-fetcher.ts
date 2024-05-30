@@ -11,6 +11,8 @@ const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
 // Contract address and ABI
 const contractAddress = "0xe7334Ad0e325139329E747cF2Fc24538dD564987";
+// The result can be verified in
+// https://explorer.mode.network/address/0xe7334Ad0e325139329E747cF2Fc24538dD564987?tab=logs
 
 // Get the contract instance
 const contract = new web3.eth.Contract(contractAbi, contractAddress);
@@ -23,27 +25,11 @@ async function getContractEvents(blockRange: number): Promise<Object[]> {
     console.log("from block:", fromBlock);
     console.log("to block:", latestBlock);
 
-    // Get all events from the contract within the specified block range
-    const events = await contract.getPastEvents('allEvents', {
+    // Get all "Transfer" events from the contract
+    const events = await contract.getPastEvents('Transfer', {
         fromBlock: Number(fromBlock),
         toBlock: 'latest'
     });
-
-    // // Filter events to only include 'Mint' events
-    // const mintEvents = events.filter(event => event.event === 'Mint');
-
-    // console.log("mint events: ", mintEvents);
-    // return mintEvents;
-    
-
-    // Get the Mint events from the contract
-    // const events = await contract.getPastEvents('Mint', {
-    //     fromBlock: Number(fromBlock),
-    //     toBlock: 'latest'
-    // });
-
-    // console.log("mint event: ", events);
-
     return events;
 }
 
@@ -83,10 +69,10 @@ async function readContractReadFunctionData() {
 // Main function to execute the above functions
 async function main() {
     try {
-        const blockRange = 500;
+        const blockRange = 1000;
         const events = await getContractEvents(blockRange);
         console.log("There are: ", events.length, " events found in the past ", blockRange, " blocks");
-        console.log("All events:", events);
+        console.log("All Transfer events:", events);
         //await getEventData(events);
 
         //const fee = await readContractReadFunctionData();
