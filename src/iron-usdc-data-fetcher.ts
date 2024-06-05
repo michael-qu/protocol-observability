@@ -1,7 +1,6 @@
 // Import the Web3 library
-const { Web3 } = require('web3');
-
-const { contractAbi } = require('../abi/iron-usdc.js');
+import { Web3 } from 'web3';
+import { contractAbi } from '../abi/iron-usdc';
 
 // RPC url for your network
 const rpcUrl = 'https://mainnet.mode.network/';
@@ -18,7 +17,7 @@ const contractAddress = "0xe7334Ad0e325139329E747cF2Fc24538dD564987";
 const contract = new web3.eth.Contract(contractAbi, contractAddress);
 
 // Function to get contract events
-async function getContractEvents(blockRange: number): Promise<Object[]> {
+async function getContractEvents(blockRange: number): Promise<EventData[]> {
     // Get the latest block number
     const latestBlock = await web3.eth.getBlockNumber();    //bigint
     const fromBlock = latestBlock - BigInt(blockRange);
@@ -30,41 +29,41 @@ async function getContractEvents(blockRange: number): Promise<Object[]> {
         fromBlock: Number(fromBlock),
         toBlock: 'latest'
     });
-    return events;
+    return events as EventData[];
 }
 
 // Function to process and print event data
-async function getEventData(events: any) {
-    for (const event of events) {
-        const owner = event.returnValues.owner;
-        const asset1 = event.returnValues.amount0;
-        const asset2 = event.returnValues.amount1;
-        const tickLower = event.returnValues.tickLower;
-        const tickUpper = event.returnValues.tickUpper;
-        const txHash = event.transactionHash;
-        const blockNumber = event.blockNumber;
+// async function getEventData(events: any) {
+//     for (const event of events) {
+//         const owner = event.returnValues.owner;
+//         const asset1 = event.returnValues.amount0;
+//         const asset2 = event.returnValues.amount1;
+//         const tickLower = event.returnValues.tickLower;
+//         const tickUpper = event.returnValues.tickUpper;
+//         const txHash = event.transactionHash;
+//         const blockNumber = event.blockNumber;
 
-        const blockData = await web3.eth.getBlock(blockNumber);
-        const txTimestamp = blockData.timestamp;
+//         const blockData = await web3.eth.getBlock(blockNumber);
+//         const txTimestamp = blockData.timestamp;
 
-        console.log({
-            owner,
-            asset1,
-            asset2,
-            tickLower,
-            tickUpper,
-            txHash,
-            blockNumber,
-            txTimestamp
-        });
-    }
-}
+//         console.log({
+//             owner,
+//             asset1,
+//             asset2,
+//             tickLower,
+//             tickUpper,
+//             txHash,
+//             blockNumber,
+//             txTimestamp
+//         });
+//     }
+// }
 
-// Function to read data from the contract
-async function readContractReadFunctionData() {
-    const fee = await contract.methods.fee().call();
-    return fee;
-}
+// // Function to read data from the contract
+// async function readContractReadFunctionData() {
+//     const fee = await contract.methods.fee().call();
+//     return fee;
+// }
 
 // Main function to execute the above functions
 async function main() {
@@ -84,5 +83,22 @@ async function main() {
 
 // Run the main function
 main();
+
+interface EventData {
+    address: string;
+    blockHash: string;
+    blockNumber: number;
+    event: string;
+    id: string;
+    logIndex: number;
+    raw: {
+        data: string;
+        topics: string[];
+    };
+    returnValues: Record<string, unknown>;
+    signature: string | null;
+    transactionHash: string;
+    transactionIndex: number;
+}
 
 export {};
