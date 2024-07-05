@@ -3,10 +3,6 @@ locals {
   lambda_timeout_sec = 30
 }
 
-provider "aws" {
-  region = "us-east-1"
-}
-
 resource "aws_iam_role" "lambda_role" {
   name = "terraform_aws_lambda_role"
   # Terraform's "jsonencode" function converts a
@@ -58,14 +54,9 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
   policy_arn = aws_iam_policy.iam_policy_for_lambda.arn
 }
 
-# Generates an archive from content, a file, or a directory of files.
-
-# data "archive_file" "zip_the_ts_code" {
-#   type        = "zip"
-#   source_file = "${path.module}/../build/index.js"
-#   output_path = "${path.module}/src/index.zip"
-# }
-
+# Generates an archive from a directory of files.
+# Make sure "terraform apply" is executed after the project is successfully built
+# ${path.module} is the directory of "main.tf", in this case it is "/infrastructure"
 data "archive_file" "zip" {
   type        = "zip"
   source_dir  = "${path.module}/../build"
@@ -73,9 +64,7 @@ data "archive_file" "zip" {
 }
 
 # Create a lambda function
-# In terraform ${path.module} is the current directory.
-
-resource "aws_lambda_function" "terraform_lambda_func_ts" {
+resource "aws_lambda_function" "this" {
   filename      = data.archive_file.zip.output_path
   function_name = local.function_name
   role          = aws_iam_role.lambda_role.arn
