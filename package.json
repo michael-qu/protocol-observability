@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "prebuild": "rm -rf build",
+    "build": "npx tsc",
+    "postbuild": "cp -R node_modules build/node_modules",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,8 +14,9 @@
   "description": "",
   "devDependencies": {
     "@eslint/js": "^9.4.0",
+    "@types/aws-lambda": "^8.10.138",
     "@types/node": "^20.12.12",
-    "eslint": "^9.4.0",
+    "eslint": "^8.56.0",
     "globals": "^15.3.0",
     "ts-node": "^10.9.2",
     "typescript-eslint": "^7.12.0"

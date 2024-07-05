@@ -1,29 +1,30 @@
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "<globally unique bucket name>"
+locals {
+  function_name      = "Blockchain-Data-Fetcher"
+  lambda_timeout_sec = 30
+}
 
-  # Prevent accidental deletion of this S3 bucket
-  lifecycle {
-    prevent_destroy = true
-  }
+provider "aws" {
+  region = "us-east-1"
 }
 
 resource "aws_iam_role" "lambda_role" {
-  name               = "terraform_aws_lambda_role"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  name = "terraform_aws_lambda_role"
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  assume_role_policy = jsonencode(
     {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "lambda.amazonaws.com"
+          },
+          "Effect" : "Allow",
+          "Sid" : ""
+        }
+      ]
+  })
 }
 
 # IAM policy for logging from a lambda
@@ -33,22 +34,21 @@ resource "aws_iam_policy" "iam_policy_for_lambda" {
   name        = "aws_iam_policy_for_terraform_aws_lambda_role"
   path        = "/"
   description = "AWS IAM Policy for managing aws lambda role"
-  policy      = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  policy = jsonencode(
     {
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "arn:aws:logs:*:*:*",
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Resource" : "arn:aws:logs:*:*:*",
+          "Effect" : "Allow"
+        }
+      ]
+  })
 }
 
 # Policy Attachment on the role.
@@ -60,20 +60,30 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
 
 # Generates an archive from content, a file, or a directory of files.
 
-data "archive_file" "zip_the_python_code" {
+# data "archive_file" "zip_the_ts_code" {
+#   type        = "zip"
+#   source_file = "${path.module}/../build/index.js"
+#   output_path = "${path.module}/src/index.zip"
+# }
+
+data "archive_file" "zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../bin/"
-  output_path = "${path.module}/../src/data-fetcher.zip"
+  source_dir  = "${path.module}/../build"
+  output_path = "observability.zip"
 }
 
 # Create a lambda function
 # In terraform ${path.module} is the current directory.
-resource "aws_lambda_function" "terraform_lambda_func" {
-  filename      = data.archive_file.zip_the_python_code.output_path
-  function_name = "Jhooq-Lambda-Function"
+
+resource "aws_lambda_function" "terraform_lambda_func_ts" {
+  filename      = data.archive_file.zip.output_path
+  function_name = local.function_name
   role          = aws_iam_role.lambda_role.arn
-  handler       = "hello-python.lambda_handler"
-  runtime       = "python3.8"
+  handler       = "index.handler"
+  runtime       = "nodejs18.x"
+  architectures = ["arm64"]
+  timeout       = local.lambda_timeout_sec
+  memory_size   = 200
   depends_on    = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
 }
 
@@ -89,4 +99,3 @@ output "teraform_aws_role_arn_output" {
 output "teraform_logging_arn_output" {
   value = aws_iam_policy.iam_policy_for_lambda.arn
 }
-

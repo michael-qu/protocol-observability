@@ -1,9 +1,7 @@
 export const contractConstants = {
     rpcUrl: 'https://mainnet.mode.network/',
-    // iron-usdc
-    contractAddress: '0xe7334Ad0e325139329E747cF2Fc24538dD564987',
-    // ProtocolDataProvider
-    // contractAddress: '0x29563f73De731Ae555093deb795ba4D1E584e42E',
+    usdcAddress: '0xd988097fb8612cc24eeC14542bC03424c656005f',
+    treasuryAddress: '0xd93E25A8B1D645b15f8c736E1419b4819Ff9e6EF',
     explorerAddress: 'https://explorer.mode.network/tx/',
     MAX_RANGE: BigInt(1000)
 };

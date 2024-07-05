@@ -1,5 +1,6 @@
-import { Contract, Web3 } from 'web3';
-import { contractAbi } from './abi/iron-usdc';
+import { Web3 } from 'web3';
+import type { Contract } from 'web3-eth-contract';
+
 
 // import { PutItem } from "./put-item-into-dynamo";
 // import { GetItem } from "./get-item-from-dynamo";
@@ -20,7 +21,7 @@ async function getContractEvents(contract: Contract<any>, fromBlock: bigint, toB
     return transferEvents as EventData[];
 }
 
-async function FetchRawTransferEvent(rpcUrl: string, contractAddress: string, explorerAddress: string): Promise<void> {
+async function FetchRawTransferEvent(rpcUrl: string, contractAddress: string, contractAbi: any, explorerAddress: string, MAX_RANGE: bigint): Promise<void> {
     try {
         // Create a Web3 instance to connect to the blockchain
         const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));

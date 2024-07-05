@@ -1,6 +1,6 @@
 // Import the Web3 library
 import { Web3 } from 'web3';
-import { contractAbi } from '../abi/iron-usdc';
+import { ironUsdcContractAbi } from '../abi/iron-usdc';
 
 // RPC url for your network
 const rpcUrl = 'https://mainnet.mode.network/';
@@ -14,7 +14,7 @@ const contractAddress = "0xe7334Ad0e325139329E747cF2Fc24538dD564987";
 // https://explorer.mode.network/address/0xe7334Ad0e325139329E747cF2Fc24538dD564987?tab=logs
 
 // Get the contract instance
-const contract = new web3.eth.Contract(contractAbi, contractAddress);
+const contract = new web3.eth.Contract(ironUsdcContractAbi, contractAddress);
 
 // Function to get contract events
 async function getContractEvents(blockRange: number): Promise<EventData[]> {

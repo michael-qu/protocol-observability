@@ -1,5 +1,5 @@
 module.exports = {
-    contractAbi: [
+    ironUsdcContractAbi: [
         {
             "anonymous": false,
             "inputs": [

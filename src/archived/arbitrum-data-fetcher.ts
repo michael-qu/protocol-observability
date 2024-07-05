@@ -1,7 +1,7 @@
 // Import the Web3 library
 const { Web3 } = require('web3');
 
-const { contractAbi } = require('../abi/arbitrum.js');
+const { contractAbi } = require('./abi/arbitrum.js');
 
 // RPC url for your network
 const rpcUrl = 'https://arb1.arbitrum.io/rpc';
