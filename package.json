@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "rm -rf build",
     "build": "npx tsc",
-    "postbuild": "cp -R node_modules build/node_modules",
+    "postbuild": "cp -R node_modules build/node_modules && cp -R abi build/abi",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,6 +22,9 @@
     "typescript-eslint": "^7.12.0"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.614.0",
+    "@aws-sdk/client-dynamodb": "^3.614.0",
+    "@aws-sdk/lib-dynamodb": "^3.614.0",
     "web3": "^4.9.0"
   }
 }

@@ -1,34 +1,59 @@
-import type { Handler, Context } from 'aws-lambda';
+import type { Handler, Context } from "aws-lambda";
 
-import { FetchRawTransferEvent } from './data-fetcher';
+import { FetchRawTransferEvent } from "./data-fetcher";
 import { GetBalance } from "./get-balance";
+import { PublishMetric } from "./publish-metric";
 
-import { contractConstants } from './shared/constants';
-import { ironTokenAddresses } from './shared/ironTokenAddresses';
+import { modeConstants } from "./shared/modeConstants";
+import { ironcladAddresses } from "./shared/ironcladAddresses";
 
-import { usdcContractAbi } from './abi/usdc';
-import { ironUsdcContractAbi } from './abi/iron-usdc';
+import { usdcContractAbi } from "./abi/usdc";
+import { ironUsdcContractAbi } from "./abi/iron-usdc";
 
 /**
  * Provide an event that contains the following keys:
  * - operation: one of 'fetchRawTransferEvent', 'fetchTVL', or 'fetchRevenue'
  */
 
-export const handler: Handler = async (event, context: Context): Promise<void> => {
+export const handler: Handler = async (
+  event,
+  context: Context,
+): Promise<void> => {
+  const operation = event.operation;
+  const nameSpace = "Contract-Metrics";
+  const dimensionValueName = "USDC";
 
-    const operation = event.operation;
-
-    switch (operation) {
-        case 'fetchRawTransferEvent':
-            await FetchRawTransferEvent(contractConstants.rpcUrl, ironTokenAddresses.ironUSDC, ironUsdcContractAbi, contractConstants.explorerAddress, contractConstants.MAX_RANGE);
-            break;
-        case 'fetchTVL':
-            await GetBalance(contractConstants.rpcUrl, contractConstants.usdcAddress, usdcContractAbi, ironTokenAddresses.ironUSDC);
-            break;
-        case 'fetchRevenue':
-            await GetBalance(contractConstants.rpcUrl, ironTokenAddresses.ironUSDC, ironUsdcContractAbi, contractConstants.treasuryAddress);
-            break;
-        default:
-            console.log(`Unknown operation: ${operation}`);
+  switch (operation) {
+    case "fetchRawTransferEvent":
+      await FetchRawTransferEvent(
+        modeConstants.rpcUrl,
+        ironcladAddresses.ATokens.ironUSDC,
+        ironUsdcContractAbi,
+        modeConstants.explorerAddress,
+        modeConstants.MAX_RANGE,
+      );
+      break;
+    case "fetchTVL": {
+      const tvl = await GetBalance(
+        modeConstants.rpcUrl,
+        ironcladAddresses.Reserves.USDC,
+        usdcContractAbi,
+        ironcladAddresses.ATokens.ironUSDC,
+      );
+      await PublishMetric(nameSpace, "TVL", dimensionValueName, "USDC TVL", tvl);
+      break;
     }
+    case "fetchRevenue": {
+      const revenue = await GetBalance(
+        modeConstants.rpcUrl,
+        ironcladAddresses.ATokens.ironUSDC,
+        ironUsdcContractAbi,
+        ironcladAddresses.Treasury
+      );
+      await PublishMetric(nameSpace, "Revenue", dimensionValueName, "USDC Revenue", revenue);
+      break;
+    }
+    default:
+      console.log(`Unknown operation: ${operation}`);
+  }
 };

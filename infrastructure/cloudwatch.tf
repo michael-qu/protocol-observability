@@ -4,10 +4,11 @@ resource "aws_cloudwatch_log_group" "this" {
 }
 
 resource "aws_cloudwatch_event_rule" "fetch_raw_transfer_event" {
-  name                = "${local.function_name}-fetchRawTransferEvent-trigger"
+  name                = "${local.function_name}-fetch-raw-transfer-event-trigger"
   description         = "Event that triggers Lambda function to fetch raw transfer events"
   schedule_expression = "rate(1 minute)"
   state               = "ENABLED"
+  # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
 resource "aws_cloudwatch_event_target" "fetch_raw_transfer_event_lambda" {
@@ -20,10 +21,11 @@ resource "aws_cloudwatch_event_target" "fetch_raw_transfer_event_lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "fetch_tvl" {
-  name                = "${local.function_name}-fetchTVL-trigger"
+  name                = "${local.function_name}-fetch-TVL-trigger"
   description         = "Event that triggers Lambda function to fetch TVL"
   schedule_expression = "rate(2 minutes)"
   state               = "ENABLED"
+  # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
 resource "aws_cloudwatch_event_target" "fetch_tvl_lambda" {
@@ -36,10 +38,11 @@ resource "aws_cloudwatch_event_target" "fetch_tvl_lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "fetch_revenue" {
-  name                = "${local.function_name}-fetchRevenue-trigger"
+  name                = "${local.function_name}-fetch-revenue-trigger"
   description         = "Event that triggers Lambda function to fetch revenue"
   schedule_expression = "rate(3 minutes)"
   state               = "ENABLED"
+  # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
 resource "aws_cloudwatch_event_target" "fetch_revenue_lambda" {
@@ -63,4 +66,28 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   function_name = aws_lambda_function.this.function_name
   principal     = "events.amazonaws.com"
   source_arn    = each.value
+}
+
+# Grant lambda function with permission to push metric to CloudWatch
+resource "aws_iam_policy" "cloudwatch_policy" {
+  name        = "${local.function_name}_cloudwatch_policy"
+  description = "Policy for CloudWatch access"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "cloudwatch:PutMetricData"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_cloudwatch_policy" {
+  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.cloudwatch_policy.arn
 }
