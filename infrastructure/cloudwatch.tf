@@ -8,6 +8,7 @@ resource "aws_cloudwatch_event_rule" "fetch_raw_transfer_event" {
   description         = "Event that triggers Lambda function to fetch raw transfer events"
   schedule_expression = "rate(1 minute)"
   state               = "ENABLED"
+  # state = "DISABLED"
   # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
@@ -25,6 +26,7 @@ resource "aws_cloudwatch_event_rule" "fetch_tvl" {
   description         = "Event that triggers Lambda function to fetch TVL"
   schedule_expression = "rate(2 minutes)"
   state               = "ENABLED"
+  # state = "DISABLED"
   # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
@@ -42,6 +44,7 @@ resource "aws_cloudwatch_event_rule" "fetch_revenue" {
   description         = "Event that triggers Lambda function to fetch revenue"
   schedule_expression = "rate(3 minutes)"
   state               = "ENABLED"
+  # state = "DISABLED"
   # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
