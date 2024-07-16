@@ -11,8 +11,7 @@ export const ironcladAddresses = {
     wrsETH: "0xe7903B1F75C534Dd8159b313d92cDCfbC62cB3Cd",
     MODE: "0xDfc7C877a950e49D2610114102175A06C2e3167a"
   },
-  // ProtocolDataProvider
-  // https://explorer.mode.network/address/0x29563f73De731Ae555093deb795ba4D1E584e42E?tab=read_contract
+  // https://docs.aave.com/developers/tokens/atoken
   ATokens: {
     ironUSDC: "0xe7334ad0e325139329e747cf2fc24538dd564987",
     ironUSDT: "0x02cd18c03b5b3f250d2b29c87949cdab4ee11488",
@@ -24,6 +23,7 @@ export const ironcladAddresses = {
     ironWeETHMode: "0x4522dbc3b2ca81809fa38fee8c1fb11c78826268",
     ironMODE: "0x0f4f2805a6d15dc534d43635314444181a0e82cd"
   },
+  // https://docs.aave.com/developers/tokens/debttoken
   VariableDebtTokens: {
     vUSDC: "0xe5415Fa763489C813694D7A79d133F0A7363310C",
     vUSDT: "0xBcE07537DF8AD5519C1d65e902e10aA48AF83d88",
@@ -35,5 +35,6 @@ export const ironcladAddresses = {
     vWrsETH: "0x083E519E76fe7e68C15A6163279eAAf87E2addAE",
     vMODE: "0xe57Bf381Fc0a7C5e6c2A3A38Cc09de37b29CC4C3"
   },
+  ProtocolDataProvider: "0x29563f73De731Ae555093deb795ba4D1E584e42E",
   Treasury: "0xd93E25A8B1D645b15f8c736E1419b4819Ff9e6EF"
 };

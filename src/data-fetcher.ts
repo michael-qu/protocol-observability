@@ -24,7 +24,7 @@ async function FetchRawTransferEvent(
   rpcUrl: string,
   contractAddress: string,
   contractAbi: any,
-  explorerAddress: string,
+  txAddressPrefix: string,
   MAX_RANGE: bigint,
 ): Promise<void> {
   // Create a Web3 instance to connect to the blockchain
@@ -77,11 +77,7 @@ async function FetchRawTransferEvent(
       if (transferEvents.length > 0) {
         console.log("All Transfer events: \n", transferEvents);
         // For test: return one of the transactions
-        console.log(
-          "One of the Txn: ",
-          explorerAddress,
-          transferEvents[0].transactionHash,
-        );
+        console.log(`One of the Txn: ${txAddressPrefix}${transferEvents[0].transactionHash}`);
       }
 
       // Write the last block fetched into DynamoDB
