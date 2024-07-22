@@ -40,9 +40,15 @@ export const handler: Handler = async (
         ironcladAddresses.Reserves.USDC,
         usdcContractAbi,
         ironcladAddresses.ATokens.ironUSDC,
-        tokenName
+        tokenName,
       );
-      await PublishMetric(nameSpace, "TVL", dimensionValueName, `${tokenName} TVL`, tvl);
+      await PublishMetric(
+        nameSpace,
+        "TVL",
+        dimensionValueName,
+        `${tokenName} TVL`,
+        tvl,
+      );
       break;
     }
     case "fetchRevenue": {
@@ -51,28 +57,72 @@ export const handler: Handler = async (
         ironcladAddresses.ATokens.ironUSDC,
         ironUsdcContractAbi,
         ironcladAddresses.Treasury,
-        tokenName
+        tokenName,
       );
-      await PublishMetric(nameSpace, "Revenue", dimensionValueName, `${tokenName} Revenue`, revenue);
+      await PublishMetric(
+        nameSpace,
+        "Revenue",
+        dimensionValueName,
+        `${tokenName} Revenue`,
+        revenue,
+      );
       break;
     }
     case "fetchDeposit": {
-      const deposit = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.ATokens.ironUSDC, ironUsdcContractAbi, tokenName);
-      await PublishMetric(nameSpace, "Deposit", dimensionValueName, `${tokenName} Deposit`, deposit);
+      const deposit = await GetTotalSupply(
+        modeConstants.rpcUrl,
+        ironcladAddresses.ATokens.ironUSDC,
+        ironUsdcContractAbi,
+        tokenName,
+      );
+      await PublishMetric(
+        nameSpace,
+        "Deposit",
+        dimensionValueName,
+        `${tokenName} Deposit`,
+        deposit,
+      );
       break;
     }
     case "fetchDebt": {
       // https://docs.aave.com/developers/tokens/debttoken
       // Returns the most up to date total debt accrued by all protocol users for that specific type (stable or variable rate) of debt token.
-      const debt = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.VariableDebtTokens.vUSDC, ironUsdcContractAbi, tokenName);
-      await PublishMetric(nameSpace, "Debt", dimensionValueName, `${tokenName} Debt`, debt);
+      const debt = await GetTotalSupply(
+        modeConstants.rpcUrl,
+        ironcladAddresses.VariableDebtTokens.vUSDC,
+        ironUsdcContractAbi,
+        tokenName,
+      );
+      await PublishMetric(
+        nameSpace,
+        "Debt",
+        dimensionValueName,
+        `${tokenName} Debt`,
+        debt,
+      );
       break;
     }
     case "fetchTMS": {
-      const deposit = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.ATokens.ironUSDC, ironUsdcContractAbi, tokenName);
-      const debt = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.VariableDebtTokens.vUSDC, ironUsdcContractAbi, tokenName);
+      const deposit = await GetTotalSupply(
+        modeConstants.rpcUrl,
+        ironcladAddresses.ATokens.ironUSDC,
+        ironUsdcContractAbi,
+        tokenName,
+      );
+      const debt = await GetTotalSupply(
+        modeConstants.rpcUrl,
+        ironcladAddresses.VariableDebtTokens.vUSDC,
+        ironUsdcContractAbi,
+        tokenName,
+      );
       const tms = deposit + debt;
-      await PublishMetric(nameSpace, "TMS", dimensionValueName, `${tokenName} TMS`, tms);
+      await PublishMetric(
+        nameSpace,
+        "TMS",
+        dimensionValueName,
+        `${tokenName} TMS`,
+        tms,
+      );
       break;
     }
     default:

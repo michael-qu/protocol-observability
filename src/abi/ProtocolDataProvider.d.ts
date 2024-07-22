@@ -1,1 +1,1 @@
-export const contractAbi: any;
+export const protocolDataProviderAbi: any;

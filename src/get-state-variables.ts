@@ -56,4 +56,4 @@ async function GetTotalSupply(
   return formattedTotalSupply;
 }
 
-export { GetBalance, GetTotalSupply };
+export { CreateContractInstance, GetBalance, GetTotalSupply };

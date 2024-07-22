@@ -1,6 +1,6 @@
 // https://explorer.mode.network/address/0x29563f73De731Ae555093deb795ba4D1E584e42E?tab=contract
 module.exports = {
-    contractAbi: [
+    protocolDataProviderAbi: [
         {
             "inputs": [
                 {
