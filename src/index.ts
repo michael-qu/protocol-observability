@@ -42,7 +42,7 @@ export const handler: Handler = async (
         ironcladAddresses.ATokens.ironUSDC,
         tokenName
       );
-      await PublishMetric(nameSpace, "TVL", dimensionValueName, "USDC TVL", tvl);
+      await PublishMetric(nameSpace, "TVL", dimensionValueName, `${tokenName} TVL`, tvl);
       break;
     }
     case "fetchRevenue": {
@@ -53,24 +53,26 @@ export const handler: Handler = async (
         ironcladAddresses.Treasury,
         tokenName
       );
-      await PublishMetric(nameSpace, "Revenue", dimensionValueName, "USDC Revenue", revenue);
+      await PublishMetric(nameSpace, "Revenue", dimensionValueName, `${tokenName} Revenue`, revenue);
       break;
     }
     case "fetchDeposit": {
       const deposit = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.ATokens.ironUSDC, ironUsdcContractAbi, tokenName);
+      await PublishMetric(nameSpace, "Deposit", dimensionValueName, `${tokenName} Deposit`, deposit);
       break;
     }
     case "fetchDebt": {
       // https://docs.aave.com/developers/tokens/debttoken
       // Returns the most up to date total debt accrued by all protocol users for that specific type (stable or variable rate) of debt token.
       const debt = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.VariableDebtTokens.vUSDC, ironUsdcContractAbi, tokenName);
+      await PublishMetric(nameSpace, "Debt", dimensionValueName, `${tokenName} Debt`, debt);
       break;
     }
     case "fetchTMS": {
       const deposit = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.ATokens.ironUSDC, ironUsdcContractAbi, tokenName);
       const debt = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.VariableDebtTokens.vUSDC, ironUsdcContractAbi, tokenName);
       const tms = deposit + debt;
-      console.log(`TMS is: ${tms} ${tokenName}`);
+      await PublishMetric(nameSpace, "TMS", dimensionValueName, `${tokenName} TMS`, tms);
       break;
     }
     default:

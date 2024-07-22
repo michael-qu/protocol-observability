@@ -10,7 +10,6 @@ async function PublishMetric(
   metricName: string,
   value: number,
 ): Promise<void> {
-
   const client = new CloudWatchClient({});
   const command = new PutMetricDataCommand({
     MetricData: [

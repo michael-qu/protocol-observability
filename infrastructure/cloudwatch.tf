@@ -32,7 +32,6 @@ resource "aws_cloudwatch_event_rule" "lambda_triggers" {
   description         = "Event that triggers Lambda function to fetch ${each.key}"
   schedule_expression = "rate(5 minutes)"
   state               = "ENABLED"
-  # state = "DISABLED"
   # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
 
@@ -54,6 +53,10 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   function_name = aws_lambda_function.this.function_name
   principal     = "events.amazonaws.com"
   source_arn    = each.value.arn
+
+  depends_on = [
+    aws_cloudwatch_event_rule.lambda_triggers
+  ]
 }
 
 # Grant lambda function with permission to push metric to CloudWatch
