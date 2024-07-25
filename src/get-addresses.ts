@@ -10,7 +10,9 @@ async function GetTokenAddresses(rpcUrl: string, address: string, abi: any): Pro
 
     for (const rta of reserveTokenAddresses) {
         const ta: TokenAddresses = await contract.methods.getReserveTokensAddresses(rta.tokenAddress).call();
-        ta.symbol = `Iron${rta.symbol}`;
+        // Remove the period "." globally in the string, to comply with name restrictions of Terraform ("^[0-9A-Za-z_-]+$")
+        // Hyphen "-" is also removed to be consistent with AToken format
+        ta.symbol = `Iron${rta.symbol.replace(/\./g, "").replace(/-/g, "")}`;
         ta.reserveTokenAddress = rta.tokenAddress;
         tokenAddresses.push(ta);
     }

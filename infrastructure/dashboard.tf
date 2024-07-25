@@ -3,12 +3,14 @@ data "aws_region" "current" {}
 locals {
   namespace  = "Contract-Metrics"
   aws_region = data.aws_region.current.name
-  symbol     = "IronUSDC"
+  symbols    = ["IronUSDC", "IronUSDT", "IronWETH", "IronezETH", "IronweETH", "IronwrsETH", "IronMBTC", "IronweETHmode", "IronMODE"]
   metrics    = ["Revenue", "TVL", "Deposit", "Debt", "TMS"]
 }
 
 resource "aws_cloudwatch_dashboard" "main" {
-  dashboard_name = "${local.function_name}-${local.symbol}-dashboard"
+  for_each = toset(local.symbols)
+
+  dashboard_name = "${local.function_name}-${each.value}-dashboard"
 
   dashboard_body = jsonencode({
     "widgets" : flatten([
@@ -23,7 +25,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             "view" : "timeSeries",
             "stacked" : false,
             "metrics" : [
-              [local.namespace, "${local.symbol} ${metric}", metric, local.symbol]
+              [local.namespace, "${each.value} ${metric}", metric, each.value]
             ],
             "region" : local.aws_region
           }
