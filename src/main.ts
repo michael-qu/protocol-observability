@@ -35,11 +35,7 @@ async function main() {
     // const tms = deposit + debt;
     // console.log(`TMS is: ${tms} ${tokenName}`);
     const tokenAddresses: TokenAddresses[] = await GetTokenAddresses(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
-    // tokenData.forEach((td: TokenAddresses) => {
-    //   const { symbol, reserveTokenAddress } = td;
-    //   console.log(`Symbol: ${symbol}, Address: ${reserveTokenAddress}`);
-    //   // Do something using symbol and tokenAddress
-    // });
+
     console.log(tokenAddresses);
 }
 

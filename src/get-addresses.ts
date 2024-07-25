@@ -1,9 +1,12 @@
 import { CreateContractInstance } from "./get-state-variables";
 
+// Return an array which includes all the addresses of all Ironclad token assets
+// @param address:  The address of ProtocolDataProvider smart contract
+// @param abi:      The ABI of ProtocolDataProvider smart contract
 async function GetTokenAddresses(rpcUrl: string, address: string, abi: any): Promise<TokenAddresses[]> {
     const contract = CreateContractInstance(rpcUrl, abi, address);
     const reserveTokenAddresses: ReserveTokenAddress[] = await contract.methods.getAllReservesTokens().call();
-    let tokenAddresses: TokenAddresses[] = [];
+    const tokenAddresses: TokenAddresses[] = [];
 
     for (const rta of reserveTokenAddresses) {
         const ta: TokenAddresses = await contract.methods.getReserveTokensAddresses(rta.tokenAddress).call();
@@ -21,6 +24,7 @@ interface ReserveTokenAddress {
     tokenAddress: string,
 }
 
+// Includes all addresses of a specific token type
 interface TokenAddresses {
     symbol: string;
     reserveTokenAddress: string,
@@ -28,4 +32,5 @@ interface TokenAddresses {
     variableDebtTokenAddress: string
 }
 
-export { GetTokenAddresses, TokenAddresses };
+export { GetTokenAddresses };
+export type { TokenAddresses };
