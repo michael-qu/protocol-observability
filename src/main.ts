@@ -6,7 +6,7 @@ import { ironcladAddresses } from "./shared/ironcladAddresses";
 
 import { usdcContractAbi } from "./abi/usdc";
 import { ironUsdcContractAbi } from "./abi/iron-usdc";
-import { protocolDataProviderAbi } from "./abi/ProtocolDataProvider"
+import { protocolDataProviderAbi } from "./abi/protocol-data-provider"
 
 async function main() {
     // const tokenName = "IronUSDC";

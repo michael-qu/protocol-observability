@@ -34,7 +34,7 @@ resource "aws_lambda_function" "this" {
 
   depends_on = [
     aws_cloudwatch_log_group.this,
-    aws_iam_role_policy_attachment.lamba_vpc_executioner,
+    # aws_iam_role_policy_attachment.lambda_vpc_executioner,
     aws_iam_role.this,
   ]
 }

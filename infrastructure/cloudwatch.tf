@@ -5,7 +5,7 @@ resource "aws_cloudwatch_log_group" "this" {
 
 locals {
   triggers = {
-    "raw-transfer-event" = {
+    raw-transfer-event = {
       operation = "fetchRawTransferEvent"
     },
     tvl = {
@@ -30,7 +30,7 @@ resource "aws_cloudwatch_event_rule" "lambda_triggers" {
   for_each            = local.triggers
   name                = "${local.function_name}-fetch-${each.key}-trigger"
   description         = "Event that triggers Lambda function to fetch ${each.key}"
-  schedule_expression = "rate(5 minutes)"
+  schedule_expression = "rate(1 hour)"
   state               = "ENABLED"
   # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }
@@ -60,22 +60,36 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
 }
 
 # Grant lambda function with permission to push metric to CloudWatch
+data "aws_iam_policy_document" "cloudwatch_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "cloudwatch:PutMetricData",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+}
+
 resource "aws_iam_policy" "cloudwatch_policy" {
-  name        = "${local.function_name}_cloudwatch_policy"
+  name        = "${local.function_name}-cloudwatch-policy"
   description = "Policy for CloudWatch access"
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "cloudwatch:PutMetricData"
-        ],
-        Effect   = "Allow",
-        Resource = "*"
-      }
-    ]
-  })
+  policy = data.aws_iam_policy_document.cloudwatch_policy.json
+
+  # policy = jsonencode({
+  #   Version = "2012-10-17",
+  #   Statement = [
+  #     {
+  #       Action = [
+  #         "cloudwatch:PutMetricData"
+  #       ],
+  #       Effect   = "Allow",
+  #       Resource = "*"
+  #     }
+  #   ]
+  # })
 }
 
 resource "aws_iam_role_policy_attachment" "attach_cloudwatch_policy" {

@@ -14,12 +14,12 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "lamba_vpc_executioner" {
-  role       = aws_iam_role.this.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
+# resource "aws_iam_role_policy_attachment" "lambda_vpc_executioner" {
+#   role       = aws_iam_role.this.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+# }
 
-resource "aws_iam_role_policy_attachment" "lamba_xray" {
+resource "aws_iam_role_policy_attachment" "lambda_xray" {
   role       = aws_iam_role.this.name
   policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }

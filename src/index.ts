@@ -9,7 +9,7 @@ import { PublishMetric } from "./publish-metric";
 import { modeConstants } from "./shared/modeConstants";
 import { ironcladAddresses } from "./shared/ironcladAddresses";
 
-import { protocolDataProviderAbi } from "./abi/ProtocolDataProvider"
+import { protocolDataProviderAbi } from "./abi/protocol-data-provider"
 import { usdcContractAbi } from "./abi/usdc";
 import { ironUsdcContractAbi } from "./abi/iron-usdc";
 
