@@ -6,12 +6,13 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 async function GetItem(
   tableName: string,
+  pkName: string,
   key: string,
 ): Promise<DynamoDBResponse | undefined> {
   const command = new GetCommand({
     TableName: tableName,
     Key: {
-      BlockType: key,
+      [pkName]: key,
     },
   });
 
@@ -31,6 +32,7 @@ interface DynamoDBResponse {
     attempts: number;
     totalRetryDelay: number;
   };
+  // Item: any;
   Item: {
     BlockNumber: bigint;
     BlockType: string;

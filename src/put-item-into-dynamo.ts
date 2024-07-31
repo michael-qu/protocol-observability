@@ -6,7 +6,9 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 async function PutItem(
   tableName: string,
+  pkName: string,
   key: string,
+  attributeName: string,
   value: bigint,
 ): Promise<void> {
   // Get the current timestamp
@@ -15,8 +17,8 @@ async function PutItem(
   const command = new PutCommand({
     TableName: tableName,
     Item: {
-      BlockType: key,
-      BlockNumber: value,
+      [pkName]: key,
+      [attributeName]: value,
       TimeStamp: currentTimeStamp,
     },
   });

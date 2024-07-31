@@ -4,8 +4,6 @@ import type { Contract } from "web3-eth-contract";
 import { PutItem } from "./put-item-into-dynamo";
 import { GetItem } from "./get-item-from-dynamo";
 
-const tableName = "BlockchainDataFetcher";
-
 // Function to get contract events
 async function getContractEvents(
   contract: Contract<any>,
@@ -27,12 +25,17 @@ async function FetchRawTransferEvent(
   txAddressPrefix: string,
   MAX_RANGE: bigint,
 ): Promise<void> {
+  const tableName = "BlockchainDataFetcher";
+  const pkName = "BlockType";
+  const key = "LastFetched";
+  const attributeName = "BlockNumber";
+
   // Create a Web3 instance to connect to the blockchain
   const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
   // Get the contract instance
   const contract = new web3.eth.Contract(contractAbi, contractAddress);
   // Get the last-fetched block number from DynamoDB
-  let response = await GetItem(tableName, "LastFetched");
+  let response = await GetItem(tableName, pkName, key);
 
   // Error handling for empty table
   if (response == null) {
@@ -42,9 +45,9 @@ async function FetchRawTransferEvent(
       // Reset the starting block
       const resetLastBlock =
         BigInt(await web3.eth.getBlockNumber()) - MAX_RANGE;
-      await PutItem(tableName, "LastFetched", resetLastBlock);
+      await PutItem(tableName, pkName, key, attributeName, resetLastBlock);
       console.log("Reset the starting block at: ", resetLastBlock);
-      response = await GetItem(tableName, "LastFetched");
+      response = await GetItem(tableName, pkName, key);
     }
     if (response == null) {
       throw new Error("Response is null!");
@@ -81,7 +84,7 @@ async function FetchRawTransferEvent(
       }
 
       // Write the last block fetched into DynamoDB
-      await PutItem(tableName, "LastFetched", toBlock);
+      await PutItem(tableName, pkName, key, attributeName, toBlock);
       console.log(toBlock, " is written into DynamoDB!");
     }
   }

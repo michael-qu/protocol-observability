@@ -18,6 +18,18 @@ resource "aws_dynamodb_table" "this" {
   }
 }
 
+resource "aws_dynamodb_table" "metric_tables" {
+  for_each     = toset(local.metrics)
+  name         = each.key
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "Asset"
+
+  attribute {
+    name = "Asset"
+    type = "S"
+  }
+}
+
 data "aws_iam_policy_document" "dynamodb_read_write_policy_document" {
   statement {
     effect = "Allow"
