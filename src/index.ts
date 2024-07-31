@@ -1,7 +1,7 @@
 import type { Handler, Context } from "aws-lambda";
 
-import { GetTokenAddresses } from "./get-addresses";
-import type { TokenAddresses } from "./get-addresses";
+import { GetTokenData } from "./get-token-data";
+import type { TokenData } from "./get-token-data";
 import { FetchRawTransferEvent } from "./data-fetcher";
 import { GetBalance, GetTotalSupply } from "./get-state-variables";
 import { PublishMetric } from "./publish-metric";
@@ -24,7 +24,7 @@ export const handler: Handler = async (
 ): Promise<void> => {
   const operation = event.operation;
 
-  const tokenAddresses: TokenAddresses[] = await GetTokenAddresses(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
+  const tokenData: TokenData[] = await GetTokenData(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
   
   const nameSpace = "Contract-Metrics";
 
@@ -41,63 +41,98 @@ export const handler: Handler = async (
       break;
 
     case "fetchTVL": {
-      for (const ta of tokenAddresses) {
+      const dimensionName = "TVL";
+      let totalTVL = 0;
+
+      for (const td of tokenData) {
         const tvl = await GetBalance(
           modeConstants.rpcUrl,
-          ta.reserveTokenAddress,
+          td.reserveTokenAddress,
           usdcContractAbi,
-          ta.aTokenAddress,
-          ta.symbol,
+          td.aTokenAddress,
+          td.symbol,
         );
         await PublishMetric(
           nameSpace,
-          "TVL",
-          ta.symbol,
-          `${ta.symbol} TVL`,
+          dimensionName,
+          td.symbol,
+          `${td.symbol} ${dimensionName}`,
           tvl,
         );
+        totalTVL += tvl * td.price;
       }
 
+      await PublishMetric(
+        nameSpace,
+        dimensionName,
+        `Total`,
+        `Total ${dimensionName}`,
+        totalTVL,
+      );
       break;
     }
 
     case "fetchRevenue": {
-      for (const ta of tokenAddresses) {
+      const dimensionName = "Revenue";
+      let totalRevenue = 0;
+
+      for (const td of tokenData) {
         const revenue = await GetBalance(
           modeConstants.rpcUrl,
-          ta.aTokenAddress,
+          td.aTokenAddress,
           ironUsdcContractAbi,
           ironcladAddresses.Treasury,
-          ta.symbol,
+          td.symbol,
         );
         await PublishMetric(
           nameSpace,
-          "Revenue",
-          ta.symbol,
-          `${ta.symbol} Revenue`,
+          dimensionName,
+          td.symbol,
+          `${td.symbol} ${dimensionName}`,
           revenue,
         );
+        totalRevenue += revenue * td.price;
       }
+
+      await PublishMetric(
+        nameSpace,
+        dimensionName,
+        `Total`,
+        `Total ${dimensionName}`,
+        totalRevenue,
+      );
 
       break;
     }
 
     case "fetchDeposit": {
-      for (const ta of tokenAddresses) {
+      const dimensionName = "Deposit";
+      let totalDeposit = 0;
+
+      for (const td of tokenData) {
         const deposit = await GetTotalSupply(
           modeConstants.rpcUrl,
-          ta.aTokenAddress,
+          td.aTokenAddress,
           ironUsdcContractAbi,
-          ta.symbol,
+          td.symbol,
         );
         await PublishMetric(
           nameSpace,
-          "Deposit",
-          ta.symbol,
-          `${ta.symbol} Deposit`,
+          dimensionName,
+          td.symbol,
+          `${td.symbol} ${dimensionName}`,
           deposit,
         );
+        totalDeposit += deposit * td.price;
       }
+
+      await PublishMetric(
+        nameSpace,
+        dimensionName,
+        `Total`,
+        `Total ${dimensionName}`,
+        totalDeposit,
+      );
       
       break;
     }
@@ -105,49 +140,72 @@ export const handler: Handler = async (
     case "fetchDebt": {
       // https://docs.aave.com/developers/tokens/debttoken
       // Returns the most up to date total debt accrued by all protocol users for that specific type (stable or variable rate) of debt token.
-      for (const ta of tokenAddresses) {
+      const dimensionName = "Debt";
+      let totalDebt = 0;
+
+      for (const td of tokenData) {
         const debt = await GetTotalSupply(
           modeConstants.rpcUrl,
-          ta.variableDebtTokenAddress,
+          td.variableDebtTokenAddress,
           ironUsdcContractAbi,
-          ta.symbol,
+          td.symbol,
         );
         await PublishMetric(
           nameSpace,
-          "Debt",
-          ta.symbol,
-          `${ta.symbol} Debt`,
+          dimensionName,
+          td.symbol,
+          `${td.symbol} ${dimensionName}`,
           debt,
         );
+        totalDebt += debt * td.price;
       }
+
+      await PublishMetric(
+        nameSpace,
+        dimensionName,
+        `Total`,
+        `Total ${dimensionName}`,
+        totalDebt,
+      );
 
       break;
     }
 
     case "fetchTMS": {
+      const dimensionName = "TMS";
+      let totalTMS = 0;
 
-      for (const ta of tokenAddresses) {
+      for (const td of tokenData) {
         const deposit = await GetTotalSupply(
           modeConstants.rpcUrl,
-          ta.aTokenAddress,
+          td.aTokenAddress,
           ironUsdcContractAbi,
-          ta.symbol,
+          td.symbol,
         );
         const debt = await GetTotalSupply(
           modeConstants.rpcUrl,
-          ta.variableDebtTokenAddress,
+          td.variableDebtTokenAddress,
           ironUsdcContractAbi,
-          ta.symbol,
+          td.symbol,
         );
         const tms = deposit + debt;
         await PublishMetric(
           nameSpace,
-          "TMS",
-          ta.symbol,
-          `${ta.symbol} TMS`,
+          dimensionName,
+          td.symbol,
+          `${td.symbol} ${dimensionName}`,
           tms,
         );
+        totalTMS += tms * td.price;
       }
+
+      await PublishMetric(
+        nameSpace,
+        dimensionName,
+        `Total`,
+        `Total ${dimensionName}`,
+        totalTMS,
+      );
       
       break;
     }

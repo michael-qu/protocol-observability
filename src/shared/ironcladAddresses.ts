@@ -37,4 +37,5 @@ export const ironcladAddresses = {
   },
   ProtocolDataProvider: "0x29563f73De731Ae555093deb795ba4D1E584e42E",
   Treasury: "0xd93E25A8B1D645b15f8c736E1419b4819Ff9e6EF",
+  Oracle: "0xE4F4F36FcBb2D53c0bAB95F5D117489579553CaA",
 };

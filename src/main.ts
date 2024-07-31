@@ -1,5 +1,5 @@
 import { GetBalance, GetTotalSupply } from "./get-state-variables";
-import { GetTokenAddresses, TokenAddresses } from "./get-addresses";
+import { GetTokenData, TokenData } from "./get-token-data";
 
 import { modeConstants } from "./shared/modeConstants";
 import { ironcladAddresses } from "./shared/ironcladAddresses";
@@ -34,7 +34,7 @@ async function main() {
 
     // const tms = deposit + debt;
     // console.log(`TMS is: ${tms} ${tokenName}`);
-    const tokenAddresses: TokenAddresses[] = await GetTokenAddresses(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
+    const tokenAddresses: TokenData[] = await GetTokenData(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
 
     console.log(tokenAddresses);
 }
