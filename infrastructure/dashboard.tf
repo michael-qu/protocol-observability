@@ -29,7 +29,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             ],
             "region" : local.aws_region
           }
-        }, 
+        },
         {
           "height" : 6,
           "width" : 4,
@@ -44,7 +44,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             ],
             "region" : local.aws_region
           }
-        }, 
+        },
       ]
     ])
   })
