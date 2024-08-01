@@ -75,21 +75,7 @@ data "aws_iam_policy_document" "cloudwatch_policy" {
 resource "aws_iam_policy" "cloudwatch_policy" {
   name        = "${local.function_name}-cloudwatch-policy"
   description = "Policy for CloudWatch access"
-
-  policy = data.aws_iam_policy_document.cloudwatch_policy.json
-
-  # policy = jsonencode({
-  #   Version = "2012-10-17",
-  #   Statement = [
-  #     {
-  #       Action = [
-  #         "cloudwatch:PutMetricData"
-  #       ],
-  #       Effect   = "Allow",
-  #       Resource = "*"
-  #     }
-  #   ]
-  # })
+  policy      = data.aws_iam_policy_document.cloudwatch_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "attach_cloudwatch_policy" {
