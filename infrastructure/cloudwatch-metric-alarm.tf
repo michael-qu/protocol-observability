@@ -1,6 +1,14 @@
-resource "aws_cloudwatch_metric_alarm" "tvl_ironusdc_anomaly_detection" {
-  alarm_name        = "${local.metrics[1]}-${local.symbols[0]}-alarm"
-  alarm_description = "Alarm of ${local.symbols[0]} ${local.metrics[1]} based on anomaly detection model"
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudwatch-alarm.html
+locals {
+  # Based on a standard deviation. Higher number means thicker band, lower number means thinner band.
+  anomaly_detection_threshold = 1
+}
+
+resource "aws_cloudwatch_metric_alarm" "tvl_anomaly_detection" {
+  for_each = { for symbol in local.symbols : symbol => symbol }
+
+  alarm_name        = "${local.metrics[1]}-${each.value}-alarm"
+  alarm_description = "Alarm of ${each.value} ${local.metrics[1]} based on anomaly detection model"
 
   actions_enabled = true
 
@@ -15,7 +23,7 @@ resource "aws_cloudwatch_metric_alarm" "tvl_ironusdc_anomaly_detection" {
   evaluation_periods = 1
   # (Optional) The number of datapoints that must be breaching to trigger the alarm
   datapoints_to_alarm = 1
-  # (Optional) If this is an alarm based on an anomaly detection model, make this value match the ID of the ANOMALY_DETECTION_BAND function.
+  # ID of the ANOMALY_DETECTION_BAND function
   threshold_metric_id = "ad1"
   comparison_operator = "LessThanLowerOrGreaterThanUpperThreshold"
   treat_missing_data  = "ignore"
@@ -24,25 +32,24 @@ resource "aws_cloudwatch_metric_alarm" "tvl_ironusdc_anomaly_detection" {
     id          = "m1"
     return_data = "true"
     metric {
-      metric_name = "${local.symbols[0]} ${local.metrics[1]}"
+      metric_name = "${each.value} ${local.metrics[1]}"
       namespace   = local.namespace
       period      = 3600
       stat        = "Average"
       unit        = "None"
 
       dimensions = {
+        # The below interpolation-only expressions is deprecated
         # "${local.metrics[1]}" = local.symbols[0]
-        TVL = local.symbols[0]
+        TVL = each.value
       }
     }
   }
 
   metric_query {
     id          = "ad1"
-    expression  = "ANOMALY_DETECTION_BAND(m1, 1)"
-    label       = "${local.symbols[0]} ${local.metrics[1]} (expected)"
+    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.anomaly_detection_threshold)
+    label       = "${each.value} ${local.metrics[1]} (expected)"
     return_data = "true"
   }
 }
-
-
