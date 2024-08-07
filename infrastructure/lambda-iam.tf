@@ -19,6 +19,12 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 #   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 # }
 
+# Provides write permissions to CloudWatch Logs
+resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_logs" {
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_xray" {
   role       = aws_iam_role.this.name
   policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"

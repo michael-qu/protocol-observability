@@ -1,21 +1,21 @@
 data "aws_region" "current" {}
 
 locals {
-  namespace     = "Contract-Metrics"
-  aws_region    = data.aws_region.current.name
-  symbols       = ["Total", "IronUSDC", "IronUSDT", "IronWETH", "IronezETH", "IronweETH", "IronwrsETH", "IronMBTC", "IronweETHmode", "IronMODE"]
-  metrics       = ["Revenue", "TVL", "Deposit", "Debt", "TMS"]
-  alarm_metrics = ["TVL", "TMS"]
+  namespace        = "Contract-Metrics"
+  aws_region       = data.aws_region.current.name
+  symbols          = ["Total", "IronUSDC", "IronUSDT", "IronWETH", "IronezETH", "IronweETH", "IronwrsETH", "IronMBTC", "IronweETHmode", "IronMODE"]
+  dimensions       = ["Revenue", "TVL", "Deposit", "Debt", "TMS"]
+  alarm_dimensions = ["TVL", "TMS"]
 }
 
-resource "aws_cloudwatch_dashboard" "state_variables" {
+resource "aws_cloudwatch_dashboard" "state_variables_dashboards" {
   for_each = toset(local.symbols)
 
   dashboard_name = "${local.function_name}-${each.value}-dashboard"
 
   dashboard_body = jsonencode({
     "widgets" : flatten([
-      for idx, metric in local.metrics : [
+      for idx, dimension in local.dimensions : [
         {
           "height" : 6,
           "width" : 4,
@@ -26,7 +26,7 @@ resource "aws_cloudwatch_dashboard" "state_variables" {
             "view" : "timeSeries",
             "stacked" : false,
             "metrics" : [
-              [local.namespace, "${each.value} ${metric}", metric, each.value]
+              [local.namespace, "${each.value} ${dimension}", dimension, each.value]
             ],
             "region" : local.aws_region
           }
@@ -41,7 +41,7 @@ resource "aws_cloudwatch_dashboard" "state_variables" {
             "view" : "singleValue",
             "stacked" : false,
             "metrics" : [
-              [local.namespace, "${each.value} ${metric}", metric, each.value]
+              [local.namespace, "${each.value} ${dimension}", dimension, each.value]
             ],
             "region" : local.aws_region
           }
@@ -52,7 +52,7 @@ resource "aws_cloudwatch_dashboard" "state_variables" {
 }
 
 resource "aws_cloudwatch_dashboard" "tvl_alarms_dashboard" {
-  dashboard_name = "${local.function_name}-${local.alarm_metrics[0]}-alarms-dashboard"
+  dashboard_name = "${local.function_name}-${local.alarm_dimensions[0]}-alarms-dashboard"
 
   dashboard_body = jsonencode({
     "widgets" : flatten([
@@ -64,7 +64,7 @@ resource "aws_cloudwatch_dashboard" "tvl_alarms_dashboard" {
           "x" : (idx % 4) * 6,
           "type" : "metric",
           "properties" : {
-            "title" : "${local.alarm_metrics[0]}-${symbol}-alarm",
+            "title" : "${local.alarm_dimensions[0]}-${symbol}-alarm",
             "annotations" : {
               "alarms" : [
                 aws_cloudwatch_metric_alarm.tvl_alarms[symbol].arn
@@ -81,7 +81,7 @@ resource "aws_cloudwatch_dashboard" "tvl_alarms_dashboard" {
 }
 
 resource "aws_cloudwatch_dashboard" "tms_alarms_dashboard" {
-  dashboard_name = "${local.function_name}-${local.alarm_metrics[1]}-alarms-dashboard"
+  dashboard_name = "${local.function_name}-${local.alarm_dimensions[1]}-alarms-dashboard"
 
   dashboard_body = jsonencode({
     "widgets" : flatten([
@@ -93,7 +93,7 @@ resource "aws_cloudwatch_dashboard" "tms_alarms_dashboard" {
           "x" : (idx % 4) * 6,
           "type" : "metric",
           "properties" : {
-            "title" : "${local.alarm_metrics[1]}-${symbol}-alarm",
+            "title" : "${local.alarm_dimensions[1]}-${symbol}-alarm",
             "annotations" : {
               "alarms" : [
                 aws_cloudwatch_metric_alarm.tms_alarms[symbol].arn
