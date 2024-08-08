@@ -5,7 +5,7 @@ locals {
   # https://www.quora.com/How-frequent-does-time-series-data-have-to-be-for-anomaly-detection-to-make-sense
   alert_period = 7200
   # Based on a standard deviation. Higher number means thicker band, lower number means thinner band.
-  anomaly_detection_threshold = 1
+  anomaly_detection_threshold = 2
   # (Required) The number of the most recent periods, or data points, to evaluate when determining alarm state.
   evaluation_periods = 1
   # (Optional) The number of datapoints that must be breaching to trigger the alarm

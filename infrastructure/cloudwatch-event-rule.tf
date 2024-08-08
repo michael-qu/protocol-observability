@@ -30,7 +30,7 @@ resource "aws_cloudwatch_event_rule" "lambda_triggers" {
   for_each            = local.triggers
   name                = "${local.function_name}-fetch-${each.key}-trigger"
   description         = "Event that triggers Lambda function to fetch ${each.key}"
-  schedule_expression = "rate(1 hour)"
+  schedule_expression = "rate(5 minutes)"
   state               = "ENABLED"
   # state = var.environment == "development" ? "DISABLED" : "ENABLED"
 }

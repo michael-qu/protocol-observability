@@ -4,39 +4,16 @@ import { GetTokenData, TokenData } from "./get-token-data";
 import { modeConstants } from "./shared/modeConstants";
 import { ironcladAddresses } from "./shared/ironcladAddresses";
 
-import { usdcContractAbi } from "./abi/usdc";
-import { ironUsdcContractAbi } from "./abi/iron-usdc";
-import { protocolDataProviderAbi } from "./abi/protocol-data-provider"
+import { reserveContractAbi } from "./abi/reserve";
+import { ironATokenContractAbi } from "./abi/iron-atoken";
+import { protocolDataProviderAbi } from "./abi/protocol-data-provider";
+import { GetRecentTxnURLWithLargestAmount } from "./get-events";
 
 async function main() {
-    // const tokenName = "IronUSDC";
-    // const tvl = await GetBalance(
-    //     modeConstants.rpcUrl,
-    //     ironcladAddresses.Reserves.USDC,
-    //     usdcContractAbi,
-    //     ironcladAddresses.ATokens.ironUSDC,
-    //     tokenName
-    //   );
-    // console.log(`Revenue is: ${tvl}`);
-    // const revenue = await GetBalance(
-    //     modeConstants.rpcUrl,
-    //     ironcladAddresses.ATokens.ironUSDC,
-    //     ironUsdcContractAbi,
-    //     ironcladAddresses.Treasury,
-    //     tokenName
-    //   );
-    // console.log(`Revenue is: ${revenue}`);
-    // const deposit = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.ATokens.ironUSDC, ironUsdcContractAbi, tokenName);
-    // console.log(`Deposit is: ${deposit} ${tokenName}`);
+    const tokenData: TokenData[] = await GetTokenData(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
 
-    // const debt = await GetTotalSupply(modeConstants.rpcUrl, ironcladAddresses.VariableDebtTokens.vUSDC, ironUsdcContractAbi, tokenName);
-    // console.log(`Dept is: ${debt} ${tokenName}`);
-
-    // const tms = deposit + debt;
-    // console.log(`TMS is: ${tms} ${tokenName}`);
-    const tokenAddresses: TokenData[] = await GetTokenData(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
-
-    console.log(tokenAddresses);
+    // console.log(tokenData);
+    console.log(await GetRecentTxnURLWithLargestAmount(modeConstants.rpcUrl, tokenData, "IronUSDC", modeConstants.MAX_RANGE));
 }
 
 main();

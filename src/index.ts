@@ -2,16 +2,17 @@ import type { Handler, Context } from "aws-lambda";
 
 import { GetTokenData } from "./get-token-data";
 import type { TokenData } from "./get-token-data";
-import { FetchRawTransferEvent } from "./data-fetcher";
+import { FetchRawTransferEvent } from "./get-events";
 import { GetBalance, GetTotalSupply } from "./get-state-variables";
-import { PublishMetric } from "./publish-metric";
+import { PublishMetric } from "./aws/publish-metric";
+// import { GetRecentTxnURLWithLargestAmount } from "./get-recent-txn-with-largest-amount";
 
 import { modeConstants } from "./shared/modeConstants";
 import { ironcladAddresses } from "./shared/ironcladAddresses";
 
 import { protocolDataProviderAbi } from "./abi/protocol-data-provider"
-import { usdcContractAbi } from "./abi/usdc";
-import { ironUsdcContractAbi } from "./abi/iron-usdc";
+import { reserveContractAbi } from "./abi/reserve";
+import { ironATokenContractAbi } from "./abi/iron-atoken";
 
 /**
  * Provide an event that contains the following keys:
@@ -33,7 +34,7 @@ export const handler: Handler = async (
       await FetchRawTransferEvent(
         modeConstants.rpcUrl,
         ironcladAddresses.ATokens.ironUSDC,
-        ironUsdcContractAbi,
+        ironATokenContractAbi,
         modeConstants.txAddressPrefix,
         modeConstants.MAX_RANGE,
       );
@@ -48,7 +49,7 @@ export const handler: Handler = async (
         const tvl = await GetBalance(
           modeConstants.rpcUrl,
           td.reserveTokenAddress,
-          usdcContractAbi,
+          reserveContractAbi,
           td.aTokenAddress,
           td.symbol,
         );
@@ -80,7 +81,7 @@ export const handler: Handler = async (
         const revenue = await GetBalance(
           modeConstants.rpcUrl,
           td.aTokenAddress,
-          ironUsdcContractAbi,
+          ironATokenContractAbi,
           ironcladAddresses.Treasury,
           td.symbol,
         );
@@ -113,7 +114,7 @@ export const handler: Handler = async (
         const deposit = await GetTotalSupply(
           modeConstants.rpcUrl,
           td.aTokenAddress,
-          ironUsdcContractAbi,
+          ironATokenContractAbi,
           td.symbol,
         );
         await PublishMetric(
@@ -147,7 +148,7 @@ export const handler: Handler = async (
         const debt = await GetTotalSupply(
           modeConstants.rpcUrl,
           td.variableDebtTokenAddress,
-          ironUsdcContractAbi,
+          ironATokenContractAbi,
           td.symbol,
         );
         await PublishMetric(
@@ -179,13 +180,13 @@ export const handler: Handler = async (
         const deposit = await GetTotalSupply(
           modeConstants.rpcUrl,
           td.aTokenAddress,
-          ironUsdcContractAbi,
+          ironATokenContractAbi,
           td.symbol,
         );
         const debt = await GetTotalSupply(
           modeConstants.rpcUrl,
           td.variableDebtTokenAddress,
-          ironUsdcContractAbi,
+          ironATokenContractAbi,
           td.symbol,
         );
         const tms = deposit + debt;
@@ -209,6 +210,13 @@ export const handler: Handler = async (
       
       break;
     }
+
+    // case "searchAnomaly": {
+    //   const assetName = event.payload.assetName;
+    //   const txnHash = await GetRecentTxnURLWithLargestAmount(modeConstants.rpcUrl, tokenData, assetName, modeConstants.MAX_RANGE);
+    //   console.log(`${modeConstants.txAddressPrefix}${txnHash}`);
+    //   break;
+    // }
 
     default:
       console.log(`Unknown operation: ${operation}`);
