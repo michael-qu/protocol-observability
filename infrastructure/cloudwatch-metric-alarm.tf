@@ -4,8 +4,6 @@ locals {
   # As per Nyquist Theorem, the period of anomaly detection should be at least 2 * metric's period
   # https://www.quora.com/How-frequent-does-time-series-data-have-to-be-for-anomaly-detection-to-make-sense
   alert_period = 7200
-  # Based on a standard deviation. Higher number means thicker band, lower number means thinner band.
-  anomaly_detection_threshold = 2
   # (Required) The number of the most recent periods, or data points, to evaluate when determining alarm state.
   evaluation_periods = 1
   # (Optional) The number of datapoints that must be breaching to trigger the alarm
@@ -24,12 +22,12 @@ resource "aws_cloudwatch_metric_alarm" "tvl_alarms" {
   # Send email when this alarm transitions into an ALARM state
   alarm_actions = [
     aws_sns_topic.anomaly_alert_topic.arn,
+    # aws_lambda_function.this.arn,
   ]
   insufficient_data_actions = []
 
   evaluation_periods  = local.evaluation_periods
   datapoints_to_alarm = local.datapoints_to_alarm
-  # ID of the ANOMALY_DETECTION_BAND function
   threshold_metric_id = "ad1"
   comparison_operator = "LessThanLowerOrGreaterThanUpperThreshold"
   treat_missing_data  = "missing"
@@ -52,7 +50,7 @@ resource "aws_cloudwatch_metric_alarm" "tvl_alarms" {
 
   metric_query {
     id          = "ad1"
-    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.anomaly_detection_threshold)
+    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.symbol_threshold_map[each.value])
     label       = "${each.value} ${local.alarm_dimensions[0]} (expected)"
     return_data = "true"
   }
@@ -75,7 +73,6 @@ resource "aws_cloudwatch_metric_alarm" "tms_alarms" {
 
   evaluation_periods  = local.evaluation_periods
   datapoints_to_alarm = local.datapoints_to_alarm
-  # ID of the ANOMALY_DETECTION_BAND function
   threshold_metric_id = "ad1"
   comparison_operator = "LessThanLowerOrGreaterThanUpperThreshold"
   treat_missing_data  = "missing"
@@ -98,7 +95,7 @@ resource "aws_cloudwatch_metric_alarm" "tms_alarms" {
 
   metric_query {
     id          = "ad1"
-    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.anomaly_detection_threshold)
+    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.symbol_threshold_map[each.value])
     label       = "${each.value} ${local.alarm_dimensions[1]} (expected)"
     return_data = "true"
   }
