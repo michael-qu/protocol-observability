@@ -97,7 +97,7 @@ async function FetchRawTransferEvent(
 }
 
 // Return the URL of the most recent txn of a given asset
-async function GetRecentTxnURLWithLargestAmount(
+async function GetRecentTxnHashWithLargestAmount(
   rpcUrl: string,
   tokenData: TokenData[],
   assetName: string,
@@ -117,7 +117,7 @@ async function GetRecentTxnURLWithLargestAmount(
     const fromBlock = latestBlock - MAX_RANGE;
     // Get all "Transfer" events from the contract
     const transferEvents = await getContractEvents(contract, fromBlock, latestBlock);
-    if (transferEvents.length == 0) {
+    if (transferEvents.length === 0) {
       return `No transaction is found for ${assetName} in the latest ${MAX_RANGE} blocks`;
     }
     
@@ -132,14 +132,12 @@ async function GetRecentTxnURLWithLargestAmount(
 
     const decimals = await contract.methods.decimals().call();
     const formattedLargestAmount = Number(largestAmount) / Math.pow(10, Number(decimals));
-
-    console.log(transferEvents);
-    console.log(largestAmount);
+    
     console.log(`Txn hash of the recent ${assetName} transaction with the largest amount is ${txnHash}, which transfered ${formattedLargestAmount} ${assetName}.`);
     return txnHash;
 }
 
-export { FetchRawTransferEvent, GetRecentTxnURLWithLargestAmount };
+export { FetchRawTransferEvent, GetRecentTxnHashWithLargestAmount };
 
 interface EventData {
   address: string;
