@@ -13,9 +13,9 @@ locals {
   aws_region = data.aws_region.current.name
   symbols    = ["Total", "IronUSDC", "IronUSDT", "IronWETH", "IronezETH", "IronweETH", "IronwrsETH", "IronMBTC", "IronweETHmode", "IronMODE"]
   # Threshold for anomaly detection (visualized as a band in the dashboard), based on a standard deviation
-  # Setting it to be 1 will generate a lot of false alarms, which is only for testing purpose
+  # Setting it to be 0.01 will immediately generate a false alarm for testing purpose
   # For tokens with larger market sizes (USDC, USDT, ETH, ezETH), threshold is smaller
-  thresholds = [2, 2, 2, 2, 2, 5, 5, 5, 5, 5]
+  thresholds = [2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
   # Map each symbol to its corresponding threshold
   symbol_threshold_map = { for idx, symbol in local.symbols : symbol => local.thresholds[idx] }
   dimensions           = ["Revenue", "TVL", "Deposit", "Debt", "TMS"]

@@ -1,16 +1,24 @@
+// AWS utils
 import type { Handler, Context } from "aws-lambda";
+import { PublishMetric } from "./aws/publish-metric";
+import { PublishMessage } from "./aws/sns";
 
+// utils
 import { GetTokenData } from "./get-token-data";
 import type { TokenData } from "./get-token-data";
-import { FetchRawTransferEvent } from "./get-events";
+import {
+  FetchRawTransferEvent,
+  GetRecentTxnHashWithLargestAmount,
+} from "./get-events";
 import { GetBalance, GetTotalSupply } from "./get-state-variables";
-import { PublishMetric } from "./aws/publish-metric";
-// import { GetRecentTxnURLWithLargestAmount } from "./get-recent-txn-with-largest-amount";
 
+// Shared constants
 import { modeConstants } from "./shared/modeConstants";
 import { ironcladAddresses } from "./shared/ironcladAddresses";
+import { awsConstants } from "./shared/awsConstants";
 
-import { protocolDataProviderAbi } from "./abi/protocol-data-provider"
+// ABIs
+import { protocolDataProviderAbi } from "./abi/protocol-data-provider";
 import { reserveContractAbi } from "./abi/reserve";
 import { ironATokenContractAbi } from "./abi/iron-atoken";
 
@@ -25,8 +33,12 @@ export const handler: Handler = async (
 ): Promise<void> => {
   const operation = event.operation;
 
-  const tokenData: TokenData[] = await GetTokenData(modeConstants.rpcUrl, ironcladAddresses.ProtocolDataProvider, protocolDataProviderAbi);
-  
+  const tokenData: TokenData[] = await GetTokenData(
+    modeConstants.rpcUrl,
+    ironcladAddresses.ProtocolDataProvider,
+    protocolDataProviderAbi,
+  );
+
   const nameSpace = "Contract-Metrics";
 
   switch (operation) {
@@ -38,7 +50,7 @@ export const handler: Handler = async (
         modeConstants.txAddressPrefix,
         modeConstants.MAX_RANGE,
       );
-      
+
       break;
 
     case "fetchTVL": {
@@ -134,7 +146,7 @@ export const handler: Handler = async (
         `Total ${dimensionName}`,
         totalDeposit,
       );
-      
+
       break;
     }
 
@@ -207,18 +219,33 @@ export const handler: Handler = async (
         `Total ${dimensionName}`,
         totalTMS,
       );
-      
+
       break;
     }
 
-    // case "searchAnomaly": {
-    //   const assetName = event.payload.assetName;
-    //   const txnHash = await GetRecentTxnURLWithLargestAmount(modeConstants.rpcUrl, tokenData, assetName, modeConstants.MAX_RANGE);
-    //   console.log(`${modeConstants.txAddressPrefix}${txnHash}`);
-    //   break;
-    // }
-
-    default:
+    default: {
       console.log(`Unknown operation: ${operation}`);
+      console.log("Full Event:", JSON.stringify(event, null, 2));
+      console.log("Context:", JSON.stringify(context, null, 2));
+      const alarmName = event.alarmData.alarmName; // e.g. "TMS-Total-alarm"
+      const parts = alarmName.split("-");
+      const assetName: string = parts[1];
+      const txnHash = await GetRecentTxnHashWithLargestAmount(
+        modeConstants.rpcUrl,
+        tokenData,
+        assetName,
+        modeConstants.MAX_RANGE,
+      );
+      const url = `${modeConstants.txAddressPrefix}${txnHash}`;
+
+      const subject = `${assetName} Transaction Found Related to Recent Alarm`;
+      const message = `Hi we notice that there is an alarm triggered by our anomaly detection algorithm. The URL of the relevant ${assetName} transaction is ${url} for your reference. Thank you.`;
+
+      await PublishMessage(subject, message, awsConstants.topicArn);
+      console.log(
+        `Email notification is sent to SNS topic ${awsConstants.topicArn}`,
+      );
+      console.log(`Email content: ${message}`);
+    }
   }
 };

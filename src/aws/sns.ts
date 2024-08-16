@@ -12,8 +12,13 @@ const snsClient = new SNSClient({});
 //  * @param {string} topicArn - The ARN of the topic to which you would like to publish.
 //  */
 
-async function PublishMessage(subject: string, message: string, topicArn: string): Promise<void> {
-  const input = { // PublishInput
+async function PublishMessage(
+  subject: string,
+  message: string,
+  topicArn: string,
+): Promise<void> {
+  const input = {
+    // PublishInput
     TopicArn: topicArn,
     // TargetArn: "STRING_VALUE",
     // PhoneNumber: "STRING_VALUE",
