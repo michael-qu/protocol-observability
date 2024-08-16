@@ -19,10 +19,10 @@ resource "aws_cloudwatch_metric_alarm" "tvl_alarms" {
   actions_enabled = true
 
   ok_actions = []
-  # Send email when this alarm transitions into an ALARM state
+  # Send email and trigger Lambda function when this alarm transitions into an ALARM state
   alarm_actions = [
     aws_sns_topic.anomaly_alert_topic.arn,
-    # aws_lambda_function.this.arn,
+    aws_lambda_function.this.arn,
   ]
   insufficient_data_actions = []
 
@@ -65,9 +65,10 @@ resource "aws_cloudwatch_metric_alarm" "tms_alarms" {
   actions_enabled = true
 
   ok_actions = []
-  # Send email when this alarm transitions into an ALARM state
+  # Send email and trigger Lambda function when this alarm transitions into an ALARM state
   alarm_actions = [
     aws_sns_topic.anomaly_alert_topic.arn,
+    aws_lambda_function.this.arn,
   ]
   insufficient_data_actions = []
 
@@ -99,4 +100,39 @@ resource "aws_cloudwatch_metric_alarm" "tms_alarms" {
     label       = "${each.value} ${local.alarm_dimensions[1]} (expected)"
     return_data = "true"
   }
+}
+
+###############################################################################
+#                     Invoke
+# CloudWatch Alarms ----------> Lambda ---> ...
+#  (TVL/TMS)        Permission
+###############################################################################
+
+# Allow CloudWatch Alarms to Invoke Lambda Function
+resource "aws_lambda_permission" "allow_cloudwatch_alarm_tvl" {
+  for_each = aws_cloudwatch_metric_alarm.tvl_alarms
+
+  statement_id  = "AllowExecutionFromCloudWatchAlarm-TVL-${each.key}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  principal     = "cloudwatch.amazonaws.com"
+  source_arn    = each.value.arn
+
+  depends_on = [
+    aws_cloudwatch_metric_alarm.tvl_alarms
+  ]
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_alarm_tms" {
+  for_each = aws_cloudwatch_metric_alarm.tms_alarms
+
+  statement_id  = "AllowExecutionFromCloudWatchAlarm-TMS-${each.key}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  principal     = "cloudwatch.amazonaws.com"
+  source_arn    = each.value.arn
+
+  depends_on = [
+    aws_cloudwatch_metric_alarm.tms_alarms
+  ]
 }

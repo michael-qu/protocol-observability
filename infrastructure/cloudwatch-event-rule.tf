@@ -1,3 +1,9 @@
+##########################################################################
+#                      Invoke             Push Data
+# CloudWatch Events ------------> Lambda ---------> CloudWatch Metrics
+# (Rule: every X hr)  Permission           Policy
+##########################################################################
+
 resource "aws_cloudwatch_log_group" "this" {
   name              = "/aws/lambda/${local.function_name}"
   retention_in_days = 365
@@ -45,6 +51,7 @@ resource "aws_cloudwatch_event_target" "lambda_targets" {
   })
 }
 
+# Allow CloudWatch Events (EventBridge) to Invoke Lambda Function
 resource "aws_lambda_permission" "allow_cloudwatch" {
   for_each = aws_cloudwatch_event_rule.lambda_triggers
 
@@ -59,7 +66,7 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   ]
 }
 
-# Grant lambda function with permission to push metric to CloudWatch
+# Allow Lambda function to push metric to CloudWatch
 data "aws_iam_policy_document" "cloudwatch_policy" {
   statement {
     effect = "Allow"
@@ -74,10 +81,11 @@ data "aws_iam_policy_document" "cloudwatch_policy" {
 
 resource "aws_iam_policy" "cloudwatch_policy" {
   name        = "${local.function_name}-cloudwatch-policy"
-  description = "Policy for CloudWatch access"
+  description = "Policy to allow Lambda function to push metric to CloudWatch"
   policy      = data.aws_iam_policy_document.cloudwatch_policy.json
 }
 
+# Grant the permission to the Lambda function's execution role
 resource "aws_iam_role_policy_attachment" "attach_cloudwatch_policy" {
   role       = aws_iam_role.this.name
   policy_arn = aws_iam_policy.cloudwatch_policy.arn

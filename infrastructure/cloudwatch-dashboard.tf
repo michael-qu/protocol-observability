@@ -1,3 +1,11 @@
+##########################################################################
+# CloudWatch Metrics     ------------> CloudWatch Dashboards
+# (symbols * dimensions)                         ^
+#                                                |
+#      CloudWatch Alarms ------------------------|
+# (symbols * alarm_dimensions)
+##########################################################################
+
 data "aws_region" "current" {}
 
 locals {

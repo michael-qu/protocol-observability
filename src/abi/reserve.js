@@ -1,5 +1,5 @@
 module.exports = {
-    usdcContractAbi: [
+    reserveContractAbi: [
         {
             "inputs": [
                 {
