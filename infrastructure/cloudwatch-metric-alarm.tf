@@ -50,7 +50,7 @@ resource "aws_cloudwatch_metric_alarm" "tvl_alarms" {
 
   metric_query {
     id          = "ad1"
-    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.symbol_threshold_map[each.value])
+    expression  = format("ANOMALY_DETECTION_BAND(m1, %f)", local.symbol_threshold_map[each.value])
     label       = "${each.value} ${local.alarm_dimensions[0]} (expected)"
     return_data = "true"
   }
@@ -96,7 +96,7 @@ resource "aws_cloudwatch_metric_alarm" "tms_alarms" {
 
   metric_query {
     id          = "ad1"
-    expression  = format("ANOMALY_DETECTION_BAND(m1, %d)", local.symbol_threshold_map[each.value])
+    expression  = format("ANOMALY_DETECTION_BAND(m1, %f)", local.symbol_threshold_map[each.value])
     label       = "${each.value} ${local.alarm_dimensions[1]} (expected)"
     return_data = "true"
   }
@@ -115,7 +115,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_alarm_tvl" {
   statement_id  = "AllowExecutionFromCloudWatchAlarm-TVL-${each.key}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
-  principal     = "cloudwatch.amazonaws.com"
+  principal     = "lambda.alarms.cloudwatch.amazonaws.com"
   source_arn    = each.value.arn
 
   depends_on = [
@@ -129,7 +129,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_alarm_tms" {
   statement_id  = "AllowExecutionFromCloudWatchAlarm-TMS-${each.key}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
-  principal     = "cloudwatch.amazonaws.com"
+  principal     = "lambda.alarms.cloudwatch.amazonaws.com"
   source_arn    = each.value.arn
 
   depends_on = [

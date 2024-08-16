@@ -103,38 +103,45 @@ async function GetRecentTxnHashWithLargestAmount(
   assetName: string,
   MAX_RANGE: bigint,
 ): Promise<string> {
+  const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+  // Get AToken address for the given asset
+  const token = tokenData.find((t) => t.symbol === assetName);
+  if (token === undefined) {
+    return `Unexpected asset: ${assetName}`;
+  }
+  // Create the contract instance
+  const contract: Contract<typeof ironATokenContractAbi> =
+    new web3.eth.Contract(ironATokenContractAbi, token.aTokenAddress);
 
-    const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
-    // Get AToken address for the given asset
-    const token = tokenData.find(t => t.symbol === assetName);
-    if (token === undefined) {
-      return `Unexpected asset: ${assetName}`;
-    }
-    // Create the contract instance
-    const contract: Contract<typeof ironATokenContractAbi> = new web3.eth.Contract(ironATokenContractAbi, token.aTokenAddress);
-    
-    const latestBlock = BigInt(await web3.eth.getBlockNumber());
-    const fromBlock = latestBlock - MAX_RANGE;
-    // Get all "Transfer" events from the contract
-    const transferEvents = await getContractEvents(contract, fromBlock, latestBlock);
-    if (transferEvents.length === 0) {
-      return `No transaction is found for ${assetName} in the latest ${MAX_RANGE} blocks`;
-    }
-    
-    let largestAmount: number = 0;
-    let txnHash: string = "";
-    for (const event of transferEvents) {
-      if (event.returnValues.value > largestAmount) {
-        largestAmount = event.returnValues.value;
-        txnHash = event.transactionHash;
-      }
-    }
+  const latestBlock = BigInt(await web3.eth.getBlockNumber());
+  const fromBlock = latestBlock - MAX_RANGE;
+  // Get all "Transfer" events from the contract
+  const transferEvents = await getContractEvents(
+    contract,
+    fromBlock,
+    latestBlock,
+  );
+  if (transferEvents.length === 0) {
+    return `No transaction is found for ${assetName} in the latest ${MAX_RANGE} blocks`;
+  }
 
-    const decimals = await contract.methods.decimals().call();
-    const formattedLargestAmount = Number(largestAmount) / Math.pow(10, Number(decimals));
-    
-    console.log(`Txn hash of the recent ${assetName} transaction with the largest amount is ${txnHash}, which transfered ${formattedLargestAmount} ${assetName}.`);
-    return txnHash;
+  let largestAmount: number = 0;
+  let txnHash: string = "";
+  for (const event of transferEvents) {
+    if (event.returnValues.value > largestAmount) {
+      largestAmount = event.returnValues.value;
+      txnHash = event.transactionHash;
+    }
+  }
+
+  const decimals = await contract.methods.decimals().call();
+  const formattedLargestAmount =
+    Number(largestAmount) / Math.pow(10, Number(decimals));
+
+  console.log(
+    `Txn hash of the recent ${assetName} transaction with the largest amount is ${txnHash}, which transfered ${formattedLargestAmount} ${assetName}.`,
+  );
+  return txnHash;
 }
 
 export { FetchRawTransferEvent, GetRecentTxnHashWithLargestAmount };
@@ -150,7 +157,7 @@ interface EventData {
     data: string;
     topics: string[];
   };
-  returnValues: Record<string, any>;  // {from: string; to: string; value: number}
+  returnValues: Record<string, any>; // {from: string; to: string; value: number}
   signature: string | null;
   transactionHash: string;
   transactionIndex: number;
