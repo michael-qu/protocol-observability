@@ -9,12 +9,12 @@ data "archive_file" "zip" {
 # NETWORK
 ################################################################################
 
-# data "aws_subnets" "private" {
-#   filter {
-#     name   = "tag:Name"
-#     values = ["Workloads Private Subnet *"]
-#   }
-# }
+data "aws_subnets" "private" {
+  filter {
+    name   = "tag:Name"
+    values = ["Workloads Private Subnet *"]
+  }
+}
 
 # data "aws_vpc" "workloads" {
 #   filter {
